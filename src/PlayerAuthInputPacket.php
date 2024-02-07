@@ -250,8 +250,10 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 				};
 			}
 		}
-		if($this->hasFlag(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE)){
-			$this->clientPredictedVehicleActorUniqueId = $in->getActorUniqueId();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+			if($this->hasFlag(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE)){
+				$this->clientPredictedVehicleActorUniqueId = $in->getActorUniqueId();
+			}
 		}
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_575){
 			$this->analogMoveVecX = $in->getLFloat();
@@ -291,8 +293,10 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 				$blockAction->write($out);
 			}
 		}
-		if($this->clientPredictedVehicleActorUniqueId !== null){
-			$out->putActorUniqueId($this->clientPredictedVehicleActorUniqueId);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+			if($this->clientPredictedVehicleActorUniqueId !== null){
+				$out->putActorUniqueId($this->clientPredictedVehicleActorUniqueId);
+			}
 		}
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_575){
 			$out->putLFloat($this->analogMoveVecX);

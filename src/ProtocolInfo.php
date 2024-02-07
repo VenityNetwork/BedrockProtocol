@@ -40,6 +40,7 @@ final class ProtocolInfo{
 
 	public const BASE_VERSION = '1.18.0';
 
+	public const PROTOCOL_649 = 649; // 1.20.60
 	public const PROTOCOL_630 = 630; // 1.20.50
 	public const PROTOCOL_622 = 622; // 1.20.40
 	public const PROTOCOL_618 = 618; // 1.20.30
@@ -61,6 +62,7 @@ final class ProtocolInfo{
 	public const PROTOCOL_475 = 475; // v1.18.0
 
 	public const COMPATIBLE_PROTOCOL = [
+		self::PROTOCOL_649,
 		self::PROTOCOL_630,
 		self::PROTOCOL_622,
 		self::PROTOCOL_618,

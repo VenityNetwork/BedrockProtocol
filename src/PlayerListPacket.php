@@ -69,7 +69,9 @@ class PlayerListPacket extends DataPacket implements ClientboundPacket{
 				$entry->skinData = $in->getSkin();
 				$entry->isTeacher = $in->getBool();
 				$entry->isHost = $in->getBool();
-				$entry->isSubClient = $in->getBool();
+				if($in->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+					$entry->isSubClient = $in->getBool();
+				}
 			}else{
 				$entry->uuid = $in->getUUID();
 			}
@@ -97,7 +99,9 @@ class PlayerListPacket extends DataPacket implements ClientboundPacket{
 				$out->putSkin($entry->skinData);
 				$out->putBool($entry->isTeacher);
 				$out->putBool($entry->isHost);
-				$out->putBool($entry->isSubClient);
+				if($out->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+					$out->putBool($entry->isSubClient);
+				}
 			}else{
 				$out->putUUID($entry->uuid);
 			}
