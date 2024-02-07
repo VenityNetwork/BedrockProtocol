@@ -49,6 +49,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 	private ?ItemStackRequest $itemStackRequest = null;
 	/** @var PlayerBlockAction[]|null */
 	private ?array $blockActions = null;
+	private ?int $clientPredictedVehicleActorUniqueId = null;
 	private float $analogMoveVecX;
 	private float $analogMoveVecZ;
 
@@ -77,6 +78,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		?ItemInteractionData $itemInteractionData,
 		?ItemStackRequest $itemStackRequest,
 		?array $blockActions,
+		?int $clientPredictedVehicleActorUniqueId,
 		float $analogMoveVecX,
 		float $analogMoveVecZ
 	) : self{
@@ -102,6 +104,9 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		if($blockActions !== null){
 			$result->inputFlags |= 1 << PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS;
 		}
+		if($clientPredictedVehicleActorUniqueId !== null){
+			$result->inputFlags |= 1 << PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE;
+		}
 
 		$result->inputMode = $inputMode;
 		$result->playMode = $playMode;
@@ -114,6 +119,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		$result->itemInteractionData = $itemInteractionData;
 		$result->itemStackRequest = $itemStackRequest;
 		$result->blockActions = $blockActions;
+		$result->clientPredictedVehicleActorUniqueId = $clientPredictedVehicleActorUniqueId;
 		$result->analogMoveVecX = $analogMoveVecX;
 		$result->analogMoveVecZ = $analogMoveVecZ;
 		return $result;
@@ -198,6 +204,8 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		return $this->blockActions;
 	}
 
+	public function getClientPredictedVehicleActorUniqueId() : ?int{ return $this->clientPredictedVehicleActorUniqueId; }
+
 	public function getAnalogMoveVecX() : float{ return $this->analogMoveVecX; }
 
 	public function getAnalogMoveVecZ() : float{ return $this->analogMoveVecZ; }
@@ -242,6 +250,9 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 				};
 			}
 		}
+		if($this->hasFlag(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE)){
+			$this->clientPredictedVehicleActorUniqueId = $in->getActorUniqueId();
+		}
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_575){
 			$this->analogMoveVecX = $in->getLFloat();
 			$this->analogMoveVecZ = $in->getLFloat();
@@ -279,6 +290,9 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 				$out->putVarInt($blockAction->getActionType());
 				$blockAction->write($out);
 			}
+		}
+		if($this->clientPredictedVehicleActorUniqueId !== null){
+			$out->putActorUniqueId($this->clientPredictedVehicleActorUniqueId);
 		}
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_575){
 			$out->putLFloat($this->analogMoveVecX);
