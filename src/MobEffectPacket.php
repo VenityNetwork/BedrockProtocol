@@ -29,11 +29,12 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 	public int $amplifier = 0;
 	public bool $particles = true;
 	public int $duration = 0;
+	public int $tick = 0;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $actorRuntimeId, int $eventId, int $effectId, int $amplifier, bool $particles, int $duration) : self{
+	public static function create(int $actorRuntimeId, int $eventId, int $effectId, int $amplifier, bool $particles, int $duration, int $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->eventId = $eventId;
@@ -41,15 +42,16 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$result->amplifier = $amplifier;
 		$result->particles = $particles;
 		$result->duration = $duration;
+		$result->tick = $tick;
 		return $result;
 	}
 
-	public static function add(int $actorRuntimeId, bool $replace, int $effectId, int $amplifier, bool $particles, int $duration) : self{
-		return self::create($actorRuntimeId, $replace ? self::EVENT_MODIFY : self::EVENT_ADD, $effectId, $amplifier, $particles, $duration);
+	public static function add(int $actorRuntimeId, bool $replace, int $effectId, int $amplifier, bool $particles, int $duration, int $tick) : self{
+		return self::create($actorRuntimeId, $replace ? self::EVENT_MODIFY : self::EVENT_ADD, $effectId, $amplifier, $particles, $duration, $tick);
 	}
 
-	public static function remove(int $actorRuntimeId, int $effectId) : self{
-		return self::create($actorRuntimeId, self::EVENT_REMOVE, $effectId, 0, false, 0);
+	public static function remove(int $actorRuntimeId, int $effectId, int $tick) : self{
+		return self::create($actorRuntimeId, self::EVENT_REMOVE, $effectId, 0, false, 0, $tick);
 	}
 
 	protected function decodePayload(PacketSerializer $in) : void{
@@ -59,6 +61,9 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$this->amplifier = $in->getVarInt();
 		$this->particles = $in->getBool();
 		$this->duration = $in->getVarInt();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$this->tick = $in->getLLong();
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -67,7 +72,9 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$out->putVarInt($this->effectId);
 		$out->putVarInt($this->amplifier);
 		$out->putBool($this->particles);
-		$out->putVarInt($this->duration);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$out->putVarInt($this->duration);
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

@@ -22,25 +22,35 @@ class SetActorMotionPacket extends DataPacket implements ClientboundPacket, Serv
 
 	public int $actorRuntimeId;
 	public Vector3 $motion;
+	public int $tick;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $actorRuntimeId, Vector3 $motion) : self{
+	public static function create(int $actorRuntimeId, Vector3 $motion, int $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->motion = $motion;
+		$result->tick = $tick;
 		return $result;
 	}
 
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->actorRuntimeId = $in->getActorRuntimeId();
 		$this->motion = $in->getVector3();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$this->tick = $in->getUnsignedVarLong();
+		}else{
+			$this->tick = 0;
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putActorRuntimeId($this->actorRuntimeId);
 		$out->putVector3($this->motion);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$out->putUnsignedVarInt($this->tick);
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{
