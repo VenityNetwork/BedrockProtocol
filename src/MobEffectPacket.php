@@ -72,8 +72,9 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$out->putVarInt($this->effectId);
 		$out->putVarInt($this->amplifier);
 		$out->putBool($this->particles);
+		$out->putVarInt($this->duration);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_662){
-			$out->putVarInt($this->duration);
+			$out->putLLong($this->tick);
 		}
 	}
 
