@@ -36,6 +36,7 @@ final class ShapedRecipe extends RecipeWithTypeId{
 		string $blockType, //TODO: rename this
 		private int $priority,
 		private int $recipeNetId,
+		private RecipeUnlockingRequirement $unlockingRequirement,
 		private bool $symmetric = true,
 	){
 		parent::__construct($typeId);
@@ -96,6 +97,13 @@ final class ShapedRecipe extends RecipeWithTypeId{
 		return $this->recipeNetId;
 	}
 
+	/**
+	 * @return RecipeUnlockingRequirement
+	 */
+	public function getUnlockingRequirement(): RecipeUnlockingRequirement{
+		return $this->unlockingRequirement;
+	}
+
 	public static function decode(int $recipeType, PacketSerializer $in) : self{
 		$recipeId = $in->getString();
 		$width = $in->getVarInt();
@@ -115,9 +123,10 @@ final class ShapedRecipe extends RecipeWithTypeId{
 		$block = $in->getString();
 		$priority = $in->getVarInt();
 		$symmetric = !($in->getProtocol() >= ProtocolInfo::PROTOCOL_671) || $in->getBool();
+		$unlockingRequirement = $in->getProtocol() >= ProtocolInfo::PROTOCOL_685 ? RecipeUnlockingRequirement::read($in) : new RecipeUnlockingRequirement(null);
 		$recipeNetId = $in->readGenericTypeNetworkId();
 
-		return new self($recipeType, $recipeId, $input, $output, $uuid, $block, $priority, $recipeNetId, $symmetric);
+		return new self($recipeType, $recipeId, $input, $output, $uuid, $block, $priority, $recipeNetId, $unlockingRequirement, $symmetric);
 	}
 
 	public function encode(PacketSerializer $out) : void{
@@ -140,6 +149,9 @@ final class ShapedRecipe extends RecipeWithTypeId{
 		$out->putVarInt($this->priority);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_671){
 			$out->putBool($this->symmetric);
+		}
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+			$this->unlockingRequirement->write($out);
 		}
 		$out->writeGenericTypeNetworkId($this->recipeNetId);
 	}

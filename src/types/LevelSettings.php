@@ -75,6 +75,9 @@ final class LevelSettings{
 	public ?bool $experimentalGameplayOverride = null;
 	public int $chatRestrictionLevel = ChatRestrictionLevel::NONE;
 	public bool $disablePlayerInteractions = false;
+	public string $serverIdentifier = "";
+	public string $worldIdentifier = "";
+	public string $scenarioIdentifier = "";
 
 	/**
 	 * @throws BinaryDataException
@@ -161,6 +164,11 @@ final class LevelSettings{
 			$this->chatRestrictionLevel = $in->getByte();
 			$this->disablePlayerInteractions = $in->getBool();
 		}
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+			$this->serverIdentifier = $in->getString();
+			$this->worldIdentifier = $in->getString();
+			$this->scenarioIdentifier = $in->getString();
+		}
 	}
 
 	public function write(PacketSerializer $out) : void{
@@ -231,6 +239,11 @@ final class LevelSettings{
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 			$out->putByte($this->chatRestrictionLevel);
 			$out->putBool($this->disablePlayerInteractions);
+		}
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+			$out->putString($this->serverIdentifier);
+			$out->putString($this->worldIdentifier);
+			$out->putString($this->scenarioIdentifier);
 		}
 	}
 }
