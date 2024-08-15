@@ -84,7 +84,9 @@ class UseItemTransactionData extends TransactionData{
 	protected function decodeData(PacketSerializer $stream) : void{
 		$this->actionType = $stream->getUnsignedVarInt();
 		if($stream->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			$this->triggerType = TriggerType::fromPacket($this->actionType);
+			$this->triggerType = TriggerType::fromPacket($stream->getUnsignedVarInt());
+		}else{
+			$this->triggerType = TriggerType::UNKNOWN;
 		}
 		$this->blockPosition = $stream->getBlockPosition();
 		$this->face = $stream->getVarInt();
