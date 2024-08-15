@@ -16,6 +16,7 @@ namespace pocketmine\network\mcpe\protocol\types\inventory;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\types\GetTypeIdFromConstTrait;
@@ -30,6 +31,7 @@ class UseItemTransactionData extends TransactionData{
 	public const ACTION_BREAK_BLOCK = 2;
 
 	private int $actionType;
+	private TriggerType $triggerType;
 	private BlockPosition $blockPosition;
 	private int $face;
 	private int $hotbarSlot;
@@ -37,9 +39,14 @@ class UseItemTransactionData extends TransactionData{
 	private Vector3 $playerPosition;
 	private Vector3 $clickPosition;
 	private int $blockRuntimeId;
+	private PredictedResult $clientInteractPrediction;
 
 	public function getActionType() : int{
 		return $this->actionType;
+	}
+
+	public function getTriggerType(): TriggerType{
+		return $this->triggerType;
 	}
 
 	public function getBlockPosition() : BlockPosition{
@@ -70,8 +77,15 @@ class UseItemTransactionData extends TransactionData{
 		return $this->blockRuntimeId;
 	}
 
+	public function getClientInteractPrediction(): PredictedResult{
+		return $this->clientInteractPrediction;
+	}
+
 	protected function decodeData(PacketSerializer $stream) : void{
 		$this->actionType = $stream->getUnsignedVarInt();
+		if($stream->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->triggerType = TriggerType::fromPacket($this->actionType);
+		}
 		$this->blockPosition = $stream->getBlockPosition();
 		$this->face = $stream->getVarInt();
 		$this->hotbarSlot = $stream->getVarInt();
@@ -79,10 +93,18 @@ class UseItemTransactionData extends TransactionData{
 		$this->playerPosition = $stream->getVector3();
 		$this->clickPosition = $stream->getVector3();
 		$this->blockRuntimeId = $stream->getUnsignedVarInt();
+		if($stream->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->clientInteractPrediction = PredictedResult::fromPacket($stream->getUnsignedVarInt());
+		}else{
+			$this->clientInteractPrediction = PredictedResult::SUCCESS;
+		}
 	}
 
 	protected function encodeData(PacketSerializer $stream) : void{
 		$stream->putUnsignedVarInt($this->actionType);
+		if($stream->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$stream->putUnsignedVarInt($this->triggerType->value);
+		}
 		$stream->putBlockPosition($this->blockPosition);
 		$stream->putVarInt($this->face);
 		$stream->putVarInt($this->hotbarSlot);
@@ -90,6 +112,9 @@ class UseItemTransactionData extends TransactionData{
 		$stream->putVector3($this->playerPosition);
 		$stream->putVector3($this->clickPosition);
 		$stream->putUnsignedVarInt($this->blockRuntimeId);
+		if($stream->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$stream->putUnsignedVarInt($this->clientInteractPrediction->value);
+		}
 	}
 
 	/**

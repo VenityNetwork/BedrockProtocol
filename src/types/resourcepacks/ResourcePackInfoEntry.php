@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\resourcepacks;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 
 class ResourcePackInfoEntry{
@@ -25,6 +26,7 @@ class ResourcePackInfoEntry{
 		private string $subPackName = "",
 		private string $contentId = "",
 		private bool $hasScripts = false,
+		private bool $isAddonPack = false,
 		private bool $isRtxCapable = false
 	){}
 
@@ -56,6 +58,10 @@ class ResourcePackInfoEntry{
 		return $this->hasScripts;
 	}
 
+	public function isAddonPack(): bool{
+		return $this->isAddonPack;
+	}
+
 	public function isRtxCapable() : bool{ return $this->isRtxCapable; }
 
 	public function write(PacketSerializer $out) : void{
@@ -66,6 +72,9 @@ class ResourcePackInfoEntry{
 		$out->putString($this->subPackName);
 		$out->putString($this->contentId);
 		$out->putBool($this->hasScripts);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putBool($this->isAddonPack);
+		}
 		$out->putBool($this->isRtxCapable);
 	}
 
@@ -77,7 +86,10 @@ class ResourcePackInfoEntry{
 		$subPackName = $in->getString();
 		$contentId = $in->getString();
 		$hasScripts = $in->getBool();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$isAddonPack = $in->getBool();
+		}
 		$rtxCapable = $in->getBool();
-		return new self($uuid, $version, $sizeBytes, $encryptionKey, $subPackName, $contentId, $hasScripts, $rtxCapable);
+		return new self($uuid, $version, $sizeBytes, $encryptionKey, $subPackName, $contentId, $hasScripts, $isAddonPack ?? false, $rtxCapable);
 	}
 }

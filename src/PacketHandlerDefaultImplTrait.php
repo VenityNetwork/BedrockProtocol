@@ -817,4 +817,24 @@ trait PacketHandlerDefaultImplTrait{
 	public function handleCraftingEvent(CraftingEventPacket $packet) : bool{
 		return false;
 	}
+
+	public function handleClientboundCloseForm(ClientboundCloseFormPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleServerboundLoadingScreen(ServerboundLoadingScreenPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleJigsawStructureData(JigsawStructureDataPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCurrentStructureFeature(CurrentStructureFeaturePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleServerboundDiagnostics(ServerboundDiagnosticsPacket $packet) : bool{
+		return false;
+	}
 }

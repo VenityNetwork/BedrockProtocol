@@ -14,8 +14,10 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\inventory\stackresponse;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\ContainerUIIds;
+use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 use function count;
 
 final class ItemStackResponseContainerInfo{

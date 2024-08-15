@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\inventory\stackrequest;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\GetTypeIdFromConstTrait;
 
@@ -26,17 +27,26 @@ final class CreativeCreateStackRequestAction extends ItemStackRequestAction{
 	public const ID = ItemStackRequestActionType::CREATIVE_CREATE;
 
 	public function __construct(
-		private int $creativeItemId
+		private int $creativeItemId,
+		private int $repetitions
 	){}
 
 	public function getCreativeItemId() : int{ return $this->creativeItemId; }
 
+	public function getRepetitions() : int{ return $this->repetitions; }
+
 	public static function read(PacketSerializer $in) : self{
 		$creativeItemId = $in->readGenericTypeNetworkId();
-		return new self($creativeItemId);
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$repetitions = $in->getByte();
+		}
+		return new self($creativeItemId, $repetitions ?? 0);
 	}
 
 	public function write(PacketSerializer $out) : void{
 		$out->writeGenericTypeNetworkId($this->creativeItemId);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putByte($this->repetitions);
+		}
 	}
 }

@@ -17,6 +17,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\camera\CameraFadeInstruction;
 use pocketmine\network\mcpe\protocol\types\camera\CameraSetInstruction;
+use pocketmine\network\mcpe\protocol\types\camera\CameraTargetInstruction;
 
 class CameraInstructionPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::CAMERA_INSTRUCTION_PACKET;
@@ -24,15 +25,19 @@ class CameraInstructionPacket extends DataPacket implements ClientboundPacket{
 	private ?CameraSetInstruction $set;
 	private ?bool $clear;
 	private ?CameraFadeInstruction $fade;
+	private ?CameraTargetInstruction $target;
+	private ?bool $removeTarget;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(?CameraSetInstruction $set, ?bool $clear, ?CameraFadeInstruction $fade) : self{
+	public static function create(?CameraSetInstruction $set, ?bool $clear, ?CameraFadeInstruction $fade, ?CameraTargetInstruction $target = null, ?bool $removeTarget = null) : self{
 		$result = new self;
 		$result->set = $set;
 		$result->clear = $clear;
 		$result->fade = $fade;
+		$result->target = $target;
+		$result->removeTarget = $removeTarget;
 		return $result;
 	}
 
@@ -46,12 +51,20 @@ class CameraInstructionPacket extends DataPacket implements ClientboundPacket{
 		$this->set = $in->readOptional(fn() => CameraSetInstruction::read($in));
 		$this->clear = $in->readOptional(fn() => $in->getBool());
 		$this->fade = $in->readOptional(fn() => CameraFadeInstruction::read($in));
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->target = $in->readOptional(fn() => CameraTargetInstruction::read($in));
+			$this->removeTarget = $in->readOptional($in->getBool(...));
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->writeOptional($this->set, fn(CameraSetInstruction $v) => $v->write($out));
 		$out->writeOptional($this->clear, fn(bool $v) => $out->putBool($v));
 		$out->writeOptional($this->fade, fn(CameraFadeInstruction $v) => $v->write($out));
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->writeOptional($this->target, fn(CameraTargetInstruction $v) => $v->write($out));
+			$out->writeOptional($this->removeTarget, $out->putBool(...));
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

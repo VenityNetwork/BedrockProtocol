@@ -86,6 +86,7 @@ final class ContainerUIIds{
 	public const CREATED_OUTPUT = 60;
 	public const SMITHING_TABLE_TEMPLATE = 61;
 	public const CRAFTER = 62;
+	public const DYNAMIC = 63;
 
 	public static function write(PacketSerializer $out, int $containerId) : void{
 		if($out->getProtocol() < ProtocolInfo::PROTOCOL_560){
@@ -100,6 +101,9 @@ final class ContainerUIIds{
 	}
 
 	public static function read(PacketSerializer $in) : ?int{
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			return FullContainerName::read($in)->getContainerId();
+		}
 		$containerId = $in->getByte();
 
 		if($in->getProtocol() < ProtocolInfo::PROTOCOL_560 && $containerId >= self::RECIPE_BOOK){

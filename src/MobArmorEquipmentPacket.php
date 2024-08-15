@@ -27,17 +27,19 @@ class MobArmorEquipmentPacket extends DataPacket implements ClientboundPacket, S
 	public ItemStackWrapper $chest;
 	public ItemStackWrapper $legs;
 	public ItemStackWrapper $feet;
+	public ItemStackWrapper $body;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $actorRuntimeId, ItemStackWrapper $head, ItemStackWrapper $chest, ItemStackWrapper $legs, ItemStackWrapper $feet) : self{
+	public static function create(int $actorRuntimeId, ItemStackWrapper $head, ItemStackWrapper $chest, ItemStackWrapper $legs, ItemStackWrapper $feet, ItemStackWrapper $body) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->head = $head;
 		$result->chest = $chest;
 		$result->legs = $legs;
 		$result->feet = $feet;
+		$result->body = $body;
 		return $result;
 	}
 
@@ -47,6 +49,9 @@ class MobArmorEquipmentPacket extends DataPacket implements ClientboundPacket, S
 		$this->chest = ItemStackWrapper::read($in);
 		$this->legs = ItemStackWrapper::read($in);
 		$this->feet = ItemStackWrapper::read($in);
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->body = ItemStackWrapper::read($in);
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -55,6 +60,9 @@ class MobArmorEquipmentPacket extends DataPacket implements ClientboundPacket, S
 		$this->chest->write($out);
 		$this->legs->write($out);
 		$this->feet->write($out);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->body->write($out);
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

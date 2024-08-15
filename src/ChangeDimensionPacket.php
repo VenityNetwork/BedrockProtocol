@@ -23,11 +23,12 @@ class ChangeDimensionPacket extends DataPacket implements ClientboundPacket{
 	public int $dimension;
 	public Vector3 $position;
 	public bool $respawn = false;
+	private ?int $loadingScreenId = null;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $dimension, Vector3 $position, bool $respawn) : self{
+	public static function create(int $dimension, Vector3 $position, bool $respawn, ?int $loadingScreenId = null) : self{
 		$result = new self;
 		$result->dimension = $dimension;
 		$result->position = $position;
@@ -39,12 +40,18 @@ class ChangeDimensionPacket extends DataPacket implements ClientboundPacket{
 		$this->dimension = $in->getVarInt();
 		$this->position = $in->getVector3();
 		$this->respawn = $in->getBool();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->loadingScreenId = $in->readOptional(fn() => $in->getLInt());
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putVarInt($this->dimension);
 		$out->putVector3($this->position);
 		$out->putBool($this->respawn);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->writeOptional($this->loadingScreenId, $out->putLInt(...));
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

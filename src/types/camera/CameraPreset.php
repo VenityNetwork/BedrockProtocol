@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\camera;
 
+use pocketmine\math\Vector2;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 
 final class CameraPreset{
@@ -28,6 +30,8 @@ final class CameraPreset{
 		private ?float $zPosition,
 		private ?float $pitch,
 		private ?float $yaw,
+		private ?Vector2 $viewOffset,
+		private ?float $radius,
 		private ?int $audioListenerType,
 		private ?bool $playerEffects
 	){}
@@ -46,6 +50,10 @@ final class CameraPreset{
 
 	public function getYaw() : ?float{ return $this->yaw; }
 
+	public function getViewOffset() : ?Vector2{ return $this->viewOffset; }
+
+	public function getRadius() : ?float{ return $this->radius; }
+
 	public function getAudioListenerType() : ?int{ return $this->audioListenerType; }
 
 	public function getPlayerEffects() : ?bool{ return $this->playerEffects; }
@@ -58,6 +66,10 @@ final class CameraPreset{
 		$zPosition = $in->readOptional(fn() => $in->getLFloat());
 		$pitch = $in->readOptional(fn() => $in->getLFloat());
 		$yaw = $in->readOptional(fn() => $in->getLFloat());
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$viewOffset = $in->readOptional(fn() => $in->getVector2());
+			$radius = $in->readOptional(fn() => $in->getLFloat());
+		}
 		$audioListenerType = $in->readOptional(fn() => $in->getByte());
 		$playerEffects = $in->readOptional(fn() => $in->getBool());
 
@@ -69,6 +81,8 @@ final class CameraPreset{
 			$zPosition,
 			$pitch,
 			$yaw,
+			$viewOffset ?? null,
+			$radius ?? null,
 			$audioListenerType,
 			$playerEffects
 		);
@@ -82,6 +96,10 @@ final class CameraPreset{
 		$out->writeOptional($this->zPosition, fn(float $v) => $out->putLFloat($v));
 		$out->writeOptional($this->pitch, fn(float $v) => $out->putLFloat($v));
 		$out->writeOptional($this->yaw, fn(float $v) => $out->putLFloat($v));
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->writeOptional($this->viewOffset, fn(Vector2 $v) => $out->putVector2($v));
+			$out->writeOptional($this->radius, fn(float $v) => $out->putLFloat($v));
+		}
 		$out->writeOptional($this->audioListenerType, fn(int $v) => $out->putByte($v));
 		$out->writeOptional($this->playerEffects, fn(bool $v) => $out->putBool($v));
 	}

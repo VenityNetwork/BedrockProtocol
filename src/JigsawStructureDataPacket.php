@@ -15,42 +15,36 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 
-class StopSoundPacket extends DataPacket implements ClientboundPacket{
-	public const NETWORK_ID = ProtocolInfo::STOP_SOUND_PACKET;
+class JigsawStructureDataPacket extends DataPacket implements ClientboundPacket{
+	public const NETWORK_ID = ProtocolInfo::JIGSAW_STRUCTURE_DATA_PACKET;
 
-	public string $soundName;
-	public bool $stopAll;
-	public bool $stopLegacyMusic;
+	/** @phpstan-var CacheableNbt<\pocketmine\nbt\tag\CompoundTag> */
+	private CacheableNbt $nbt;
 
 	/**
 	 * @generate-create-func
+	 * @phpstan-param CacheableNbt<\pocketmine\nbt\tag\CompoundTag> $nbt
 	 */
-	public static function create(string $soundName, bool $stopAll, bool $stopLegacyMusic = false) : self{
+	public static function create(CacheableNbt $nbt) : self{
 		$result = new self;
-		$result->soundName = $soundName;
-		$result->stopAll = $stopAll;
-		$result->stopLegacyMusic = $stopLegacyMusic;
+		$result->nbt = $nbt;
 		return $result;
 	}
 
+	/** @phpstan-return CacheableNbt<\pocketmine\nbt\tag\CompoundTag> */
+	public function getNbt() : CacheableNbt{ return $this->nbt; }
+
 	protected function decodePayload(PacketSerializer $in) : void{
-		$this->soundName = $in->getString();
-		$this->stopAll = $in->getBool();
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			$this->stopLegacyMusic = $in->getBool();
-		}
+		$this->nbt = new CacheableNbt($in->getNbtCompoundRoot());
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
-		$out->putString($this->soundName);
-		$out->putBool($this->stopAll);
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			$out->putBool($this->stopLegacyMusic);
-		}
+		$out->put($this->nbt->getEncodedNbt());
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{
-		return $handler->handleStopSound($this);
+		return $handler->handleJigsawStructureData($this);
 	}
 }

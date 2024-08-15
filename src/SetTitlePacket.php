@@ -36,6 +36,7 @@ class SetTitlePacket extends DataPacket implements ClientboundPacket{
 	public int $fadeOutTime = 0;
 	public string $xuid = "";
 	public string $platformOnlineId = "";
+	public string $filteredTitleText = "";
 
 	/**
 	 * @generate-create-func
@@ -48,6 +49,7 @@ class SetTitlePacket extends DataPacket implements ClientboundPacket{
 		int $fadeOutTime,
 		string $xuid,
 		string $platformOnlineId,
+		string $filteredTitleText = ""
 	) : self{
 		$result = new self;
 		$result->type = $type;
@@ -57,6 +59,7 @@ class SetTitlePacket extends DataPacket implements ClientboundPacket{
 		$result->fadeOutTime = $fadeOutTime;
 		$result->xuid = $xuid;
 		$result->platformOnlineId = $platformOnlineId;
+		$result->filteredTitleText = $filteredTitleText;
 		return $result;
 	}
 
@@ -68,6 +71,9 @@ class SetTitlePacket extends DataPacket implements ClientboundPacket{
 		$this->fadeOutTime = $in->getVarInt();
 		$this->xuid = $in->getString();
 		$this->platformOnlineId = $in->getString();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->filteredTitleText = $in->getString();
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -78,6 +84,9 @@ class SetTitlePacket extends DataPacket implements ClientboundPacket{
 		$out->putVarInt($this->fadeOutTime);
 		$out->putString($this->xuid);
 		$out->putString($this->platformOnlineId);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putString($this->filteredTitleText);
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

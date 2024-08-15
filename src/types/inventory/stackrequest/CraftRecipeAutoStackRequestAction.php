@@ -35,6 +35,7 @@ final class CraftRecipeAutoStackRequestAction extends ItemStackRequestAction{
 	 */
 	final public function __construct(
 		private int $recipeId,
+		private int $repetitions2,
 		private int $repetitions,
 		private array $ingredients
 	){}
@@ -42,6 +43,10 @@ final class CraftRecipeAutoStackRequestAction extends ItemStackRequestAction{
 	public function getRecipeId() : int{ return $this->recipeId; }
 
 	public function getRepetitions() : int{ return $this->repetitions; }
+
+	public function getRepetitions2(): int{
+		return $this->repetitions2;
+	}
 
 	/**
 	 * @return RecipeIngredient[]
@@ -51,6 +56,9 @@ final class CraftRecipeAutoStackRequestAction extends ItemStackRequestAction{
 
 	public static function read(PacketSerializer $in) : self{
 		$recipeId = $in->readGenericTypeNetworkId();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$repetitions2 = $in->getByte();
+		}
 		$repetitions = $in->getByte();
 		$ingredients = [];
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_557){
@@ -58,11 +66,14 @@ final class CraftRecipeAutoStackRequestAction extends ItemStackRequestAction{
 				$ingredients[] = $in->getRecipeIngredient();
 			}
 		}
-		return new self($recipeId, $repetitions, $ingredients);
+		return new self($recipeId, $repetitions2 ?? 0, $repetitions, $ingredients);
 	}
 
 	public function write(PacketSerializer $out) : void{
 		$out->writeGenericTypeNetworkId($this->recipeId);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putByte($this->repetitions2);
+		}
 		$out->putByte($this->repetitions);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_557){
 			$out->putByte(count($this->ingredients));

@@ -32,14 +32,16 @@ final class ProtocolInfo{
 	 */
 
 	/** Actual Minecraft: PE protocol version */
-	public const CURRENT_PROTOCOL = 685;
+	public const CURRENT_PROTOCOL = 712;
 	/** Current Minecraft PE version reported by the server. This is usually the earliest currently supported version. */
-	public const MINECRAFT_VERSION = 'v1.21.0';
+	public const MINECRAFT_VERSION = 'v1.21.20';
 	/** Version number sent to clients in ping responses. */
-	public const MINECRAFT_VERSION_NETWORK = '1.21.0';
+	public const MINECRAFT_VERSION_NETWORK = '1.21.20';
 
 	public const BASE_VERSION = '1.18.0';
 
+	public const PROTOCOL_712 = 712; // 1.21.20
+	public const PROTOCOL_686 = 686; // 1.21.2
 	public const PROTOCOL_685 = 685; // 1.21.0
 	public const PROTOCOL_671 = 671; // 1.20.80
 	public const PROTOCOL_662 = 662; // 1.20.70
@@ -65,6 +67,8 @@ final class ProtocolInfo{
 	public const PROTOCOL_475 = 475; // v1.18.0
 
 	public const COMPATIBLE_PROTOCOL = [
+		self::PROTOCOL_712,
+		self::PROTOCOL_686,
 		self::PROTOCOL_685,
 		self::PROTOCOL_671,
 		self::PROTOCOL_662,
@@ -295,5 +299,10 @@ final class ProtocolInfo{
 	public const PLAYER_TOGGLE_CRAFTER_SLOT_REQUEST_PACKET = 0x132;
 	public const SET_PLAYER_INVENTORY_OPTIONS_PACKET = 0x133;
 	public const SET_HUD_PACKET = 0x134;
+
+	public const SERVERBOUND_LOADING_SCREEN_PACKET = 0x138;
+	public const JIGSAW_STRUCTURE_DATA_PACKET = 0x139;
+	public const CURRENT_STRUCTURE_FEATURE_PACKET = 0x13a;
+	public const SERVERBOUND_DIAGNOSTICS_PACKET = 0x13b;
 
 }

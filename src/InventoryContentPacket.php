@@ -24,15 +24,17 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 	public int $windowId;
 	/** @var ItemStackWrapper[] */
 	public array $items = [];
+	public int $dynamicContainerId;
 
 	/**
 	 * @generate-create-func
 	 * @param ItemStackWrapper[] $items
 	 */
-	public static function create(int $windowId, array $items) : self{
+	public static function create(int $windowId, array $items, int $dynamicContainerId) : self{
 		$result = new self;
 		$result->windowId = $windowId;
 		$result->items = $items;
+		$result->dynamicContainerId = $dynamicContainerId;
 		return $result;
 	}
 
@@ -42,6 +44,9 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 		for($i = 0; $i < $count; ++$i){
 			$this->items[] = ItemStackWrapper::read($in);
 		}
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$this->dynamicContainerId = $in->getUnsignedVarInt();
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -49,6 +54,9 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 		$out->putUnsignedVarInt(count($this->items));
 		foreach($this->items as $item){
 			$item->write($out);
+		}
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putUnsignedVarInt($this->dynamicContainerId);
 		}
 	}
 
