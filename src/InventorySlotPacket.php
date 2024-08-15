@@ -28,31 +28,31 @@ class InventorySlotPacket extends DataPacket implements ClientboundPacket{
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $windowId, int $inventorySlot, ItemStackWrapper $item, int $dynamicContainerId) : self{
+	public static function create(int $windowId, int $inventorySlot, ItemStackWrapper $item, int $dynamicContainerId = 0) : self{
 		$result = new self;
 		$result->windowId = $windowId;
 		$result->inventorySlot = $inventorySlot;
-		$result->item = $item;
 		$result->dynamicContainerId = $dynamicContainerId;
+		$result->item = $item;
 		return $result;
 	}
 
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->windowId = $in->getUnsignedVarInt();
 		$this->inventorySlot = $in->getUnsignedVarInt();
-		$this->item = ItemStackWrapper::read($in);
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			$this->dynamicContainerId = $in->getUnsignedVarInt();
 		}
+		$this->item = ItemStackWrapper::read($in);
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putUnsignedVarInt($this->windowId);
 		$out->putUnsignedVarInt($this->inventorySlot);
-		$this->item->write($out);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			$out->putUnsignedVarInt($this->dynamicContainerId);
 		}
+		$this->item->write($out);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{
