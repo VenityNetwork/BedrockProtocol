@@ -26,6 +26,6 @@ class EntityLink{
 		public int $type,
 		public bool $immediate,
 		public bool $causedByRider,
-		public float $vehicleAngularVelocity
+		public float $vehicleAngularVelocity = 0.0
 	){}
 }
