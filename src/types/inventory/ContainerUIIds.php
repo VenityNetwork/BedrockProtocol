@@ -104,7 +104,7 @@ final class ContainerUIIds{
 		$out->putByte($containerId);
 	}
 
-	public static function read(PacketSerializer $in, bool $legacy = false) : ?int{
+	public static function read(PacketSerializer $in, bool $legacy = false) : int{
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712 && !$legacy){
 			return FullContainerName::read($in)->getContainerId();
 		}

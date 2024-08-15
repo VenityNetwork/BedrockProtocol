@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 
 class MobArmorEquipmentPacket extends DataPacket implements ClientboundPacket, ServerboundPacket{
@@ -27,12 +28,12 @@ class MobArmorEquipmentPacket extends DataPacket implements ClientboundPacket, S
 	public ItemStackWrapper $chest;
 	public ItemStackWrapper $legs;
 	public ItemStackWrapper $feet;
-	public ItemStackWrapper $body;
+	public ?ItemStackWrapper $body;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $actorRuntimeId, ItemStackWrapper $head, ItemStackWrapper $chest, ItemStackWrapper $legs, ItemStackWrapper $feet, ItemStackWrapper $body) : self{
+	public static function create(int $actorRuntimeId, ItemStackWrapper $head, ItemStackWrapper $chest, ItemStackWrapper $legs, ItemStackWrapper $feet, ?ItemStackWrapper $body = null) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->head = $head;
@@ -61,7 +62,11 @@ class MobArmorEquipmentPacket extends DataPacket implements ClientboundPacket, S
 		$this->legs->write($out);
 		$this->feet->write($out);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			$this->body->write($out);
+			if($this->body === null){
+				(new ItemStackWrapper(0, ItemStack::null()))->write($out);
+			}else{
+				$this->body->write($out);
+			}
 		}
 	}
 
