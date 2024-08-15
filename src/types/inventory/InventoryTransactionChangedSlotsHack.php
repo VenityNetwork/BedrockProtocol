@@ -32,7 +32,7 @@ final class InventoryTransactionChangedSlotsHack{
 	public function getChangedSlotIndexes() : array{ return $this->changedSlotIndexes; }
 
 	public static function read(PacketSerializer $in) : self{
-		$containerId = ContainerUIIds::read($in);
+		$containerId = ContainerUIIds::read($in, true);
 		$changedSlots = [];
 		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
 			$changedSlots[] = $in->getByte();
@@ -41,7 +41,7 @@ final class InventoryTransactionChangedSlotsHack{
 	}
 
 	public function write(PacketSerializer $out) : void{
-		ContainerUIIds::write($out, $this->containerId);
+		ContainerUIIds::write($out, $this->containerId, true);
 		$out->putUnsignedVarInt(count($this->changedSlotIndexes));
 		foreach($this->changedSlotIndexes as $index){
 			$out->putByte($index);

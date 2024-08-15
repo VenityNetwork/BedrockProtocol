@@ -88,20 +88,24 @@ final class ContainerUIIds{
 	public const CRAFTER = 62;
 	public const DYNAMIC = 63;
 
-	public static function write(PacketSerializer $out, int $containerId) : void{
+	public static function write(PacketSerializer $out, int $containerId, bool $legacy = false) : void{
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712 && !$legacy){
+			(new FullContainerName($containerId))->write($out);
+			return;
+		}
 		if($out->getProtocol() < ProtocolInfo::PROTOCOL_560){
 			if($containerId > self::RECIPE_BOOK){
 				$containerId--;
 			}elseif($containerId === self::RECIPE_BOOK){
-				throw new \InvalidArgumentException("Invalid container ID for protocol version " . $out->getProtocolId());
+				throw new \InvalidArgumentException("Invalid container ID for protocol version " . $out->getProtocol());
 			}
 		}
 
 		$out->putByte($containerId);
 	}
 
-	public static function read(PacketSerializer $in) : ?int{
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+	public static function read(PacketSerializer $in, bool $legacy = false) : ?int{
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712 && !$legacy){
 			return FullContainerName::read($in)->getContainerId();
 		}
 		$containerId = $in->getByte();
