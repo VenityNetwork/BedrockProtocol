@@ -68,7 +68,7 @@ final class ProtocolInfo{
 
 	public const COMPATIBLE_PROTOCOL = [
 		self::PROTOCOL_712,
-		self::PROTOCOL_686,
+//		self::PROTOCOL_686,
 		self::PROTOCOL_685,
 		self::PROTOCOL_671,
 		self::PROTOCOL_662,
