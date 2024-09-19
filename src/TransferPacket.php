@@ -21,25 +21,33 @@ class TransferPacket extends DataPacket implements ClientboundPacket{
 
 	public string $address;
 	public int $port = 19132;
+	public bool $reloadWorld = true;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(string $address, int $port) : self{
+	public static function create(string $address, int $port, bool $reloadWorld = true) : self{
 		$result = new self;
 		$result->address = $address;
 		$result->port = $port;
+		$result->reloadWorld = $reloadWorld;
 		return $result;
 	}
 
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->address = $in->getString();
 		$this->port = $in->getLShort();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->reloadWorld = $in->getBool();
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putString($this->address);
 		$out->putLShort($this->port);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->reloadWorld = $out->getBool();
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

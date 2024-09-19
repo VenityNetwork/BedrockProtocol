@@ -518,6 +518,11 @@ class PacketSerializer extends BinaryStream{
 			$this->putLFloat($attribute->getMin());
 			$this->putLFloat($attribute->getMax());
 			$this->putLFloat($attribute->getCurrent());
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729) {
+				// TODO: implement default min & max
+				$this->putLFloat($attribute->getMin()); // default min
+				$this->putLFloat($attribute->getMax()); // default max
+			}
 			$this->putLFloat($attribute->getDefault());
 			$this->putString($attribute->getId());
 

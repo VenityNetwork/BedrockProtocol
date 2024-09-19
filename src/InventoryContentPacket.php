@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 use function count;
 
@@ -24,17 +25,19 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 	public int $windowId;
 	/** @var ItemStackWrapper[] */
 	public array $items = [];
-	public int $dynamicContainerId;
+	public FullContainerName $containerName;
+	public int $dynamicContainerSize = 0;
 
 	/**
 	 * @generate-create-func
 	 * @param ItemStackWrapper[] $items
 	 */
-	public static function create(int $windowId, array $items, int $dynamicContainerId = 0) : self{
+	public static function create(int $windowId, array $items, FullContainerName $containerName, int $dynamicContainerSize = 0) : self{
 		$result = new self;
 		$result->windowId = $windowId;
 		$result->items = $items;
-		$result->dynamicContainerId = $dynamicContainerId;
+		$result->containerName = $containerName;
+		$result->dynamicContainerSize = $dynamicContainerSize;
 		return $result;
 	}
 
@@ -45,7 +48,13 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 			$this->items[] = ItemStackWrapper::read($in);
 		}
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			$this->dynamicContainerId = $in->getUnsignedVarInt();
+			if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				$this->containerName = FullContainerName::read($in);
+				$this->dynamicContainerSize = $in->getUnsignedVarInt();
+			}else {
+				$dynamicContainerId = $in->getUnsignedVarInt();
+				$this->containerName = new FullContainerName(0, $dynamicContainerId);
+			}
 		}
 	}
 
@@ -56,7 +65,12 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 			$item->write($out);
 		}
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			$out->putUnsignedVarInt($this->dynamicContainerId);
+			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				$this->containerName->write($out);
+				$out->putUnsignedVarInt($this->dynamicContainerSize);
+			}else {
+				$out->putUnsignedVarInt($this->containerName->getDynamicId());
+			}
 		}
 	}
 
