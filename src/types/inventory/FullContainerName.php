@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\inventory;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 
 final class FullContainerName{
@@ -28,12 +29,17 @@ final class FullContainerName{
 
 	public static function read(PacketSerializer $in) : self{
 		$containerId = $in->getByte();
-		$dynamicId = $in->readOptional($in->getLInt(...));
+		$dynamicId = $in->getProtocol() >= ProtocolInfo::PROTOCOL_729 ?
+			$in->readOptional($in->getLInt(...)) : $in->getLInt();
 		return new self($containerId, $dynamicId);
 	}
 
 	public function write(PacketSerializer $out) : void{
 		$out->putByte($this->containerId);
-		$out->writeOptional($this->dynamicId, $out->putLInt(...));
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729) {
+			$out->writeOptional($this->dynamicId, $out->putLInt(...));
+		}else{
+			$out->putLInt($this->dynamicId);
+		}
 	}
 }
