@@ -39,7 +39,7 @@ final class FullContainerName{
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729) {
 			$out->writeOptional($this->dynamicId, $out->putLInt(...));
 		}else{
-			$out->putLInt($this->dynamicId);
+			$out->putLInt($this->dynamicId ?? 0);
 		}
 	}
 }
