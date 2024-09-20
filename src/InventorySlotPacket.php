@@ -48,8 +48,8 @@ class InventorySlotPacket extends DataPacket implements ClientboundPacket{
 				$this->containerName = FullContainerName::read($in);
 				$this->dynamicContainerSize = $in->getUnsignedVarInt();
 			}else{
-				$in->getUnsignedVarInt(); // ignore
-				$this->containerName = new FullContainerName(0);
+				$dynamicId = $this->containerName->getDynamicId();
+				$this->containerName = new FullContainerName(0, $dynamicId);
 			}
 		}
 		$this->item = ItemStackWrapper::read($in);
@@ -63,7 +63,7 @@ class InventorySlotPacket extends DataPacket implements ClientboundPacket{
 				$this->containerName->write($out);
 				$out->putUnsignedVarInt($this->dynamicContainerSize);
 			}else{
-				$out->putUnsignedVarInt(0);
+				$out->putUnsignedVarInt($this->containerName->getDynamicId() ?? 0);
 			}
 		}
 		$this->item->write($out);
