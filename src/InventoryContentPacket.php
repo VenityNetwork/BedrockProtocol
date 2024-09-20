@@ -68,7 +68,7 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 				$this->containerName->write($out);
 				$out->putUnsignedVarInt($this->dynamicContainerSize);
-			}else {
+			}else{
 				$out->putUnsignedVarInt($this->containerName->getDynamicId());
 			}
 		}

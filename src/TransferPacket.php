@@ -21,12 +21,12 @@ class TransferPacket extends DataPacket implements ClientboundPacket{
 
 	public string $address;
 	public int $port = 19132;
-	public bool $reloadWorld = true;
+	public bool $reloadWorld = false;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(string $address, int $port, bool $reloadWorld = true) : self{
+	public static function create(string $address, int $port, bool $reloadWorld = false) : self{
 		$result = new self;
 		$result->address = $address;
 		$result->port = $port;
