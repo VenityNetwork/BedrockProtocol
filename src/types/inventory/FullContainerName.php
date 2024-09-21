@@ -29,16 +29,19 @@ final class FullContainerName{
 
 	public static function read(PacketSerializer $in) : self{
 		$containerId = $in->getByte();
-		$dynamicId = $in->getProtocol() >= ProtocolInfo::PROTOCOL_729 ?
-			$in->readOptional($in->getLInt(...)) : $in->getLInt();
-		return new self($containerId, $dynamicId);
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$dynamicId = $in->readOptional($in->getLInt(...));
+		}elseif($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$dynamicId = $in->getLInt();
+		}
+		return new self($containerId, $dynamicId ?? null);
 	}
 
 	public function write(PacketSerializer $out) : void{
 		$out->putByte($this->containerId);
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729) {
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 			$out->writeOptional($this->dynamicId, $out->putLInt(...));
-		}else{
+		}elseif($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			$out->putLInt($this->dynamicId ?? 0);
 		}
 	}

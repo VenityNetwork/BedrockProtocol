@@ -47,14 +47,12 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 		for($i = 0; $i < $count; ++$i){
 			$this->items[] = ItemStackWrapper::read($in);
 		}
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->containerName = FullContainerName::read($in);
-				$this->dynamicContainerSize = $in->getUnsignedVarInt();
-			}else {
-				$dynamicId = $in->getUnsignedVarInt();
-				$this->containerName = new FullContainerName(0, $dynamicId);
-			}
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->containerName = FullContainerName::read($in);
+			$this->dynamicContainerSize = $in->getUnsignedVarInt();
+		}elseif($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$dynamicId = $in->getUnsignedVarInt();
+			$this->containerName = new FullContainerName(0, $dynamicId);
 		}
 	}
 
@@ -64,13 +62,11 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 		foreach($this->items as $item){
 			$item->write($out);
 		}
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->containerName->write($out);
-				$out->putUnsignedVarInt($this->dynamicContainerSize);
-			}else{
-				$out->putUnsignedVarInt($this->containerName->getDynamicId() ?? 0);
-			}
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->containerName->write($out);
+			$out->putUnsignedVarInt($this->dynamicContainerSize);
+		}elseif($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putUnsignedVarInt($this->containerName->getDynamicId() ?? 0);
 		}
 	}
 

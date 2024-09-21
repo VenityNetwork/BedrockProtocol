@@ -15,30 +15,32 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol\types\inventory\stackrequest;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\types\inventory\ContainerUIIds;
+use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 
 final class ItemStackRequestSlotInfo{
 	public function __construct(
-		private int $containerId,
+		private FullContainerName $containerName,
 		private int $slotId,
 		private int $stackId
 	){}
 
-	public function getContainerId() : int{ return $this->containerId; }
+	public function getContainerId() : int{ return $this->containerName->getContainerId(); }
+
+	public function getContainerName() : FullContainerName{ return $this->containerName; }
 
 	public function getSlotId() : int{ return $this->slotId; }
 
 	public function getStackId() : int{ return $this->stackId; }
 
 	public static function read(PacketSerializer $in) : self{
-		$containerId = ContainerUIIds::read($in);
+		$containerName = FullContainerName::read($in);
 		$slotId = $in->getByte();
 		$stackId = $in->readGenericTypeNetworkId();
-		return new self($containerId, $slotId, $stackId);
+		return new self($containerName, $slotId, $stackId);
 	}
 
 	public function write(PacketSerializer $out) : void{
-		ContainerUIIds::write($out, $this->containerId);
+		$this->containerName->write($out);
 		$out->putByte($this->slotId);
 		$out->writeGenericTypeNetworkId($this->stackId);
 	}

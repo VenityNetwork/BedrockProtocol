@@ -43,14 +43,12 @@ class InventorySlotPacket extends DataPacket implements ClientboundPacket{
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->windowId = $in->getUnsignedVarInt();
 		$this->inventorySlot = $in->getUnsignedVarInt();
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->containerName = FullContainerName::read($in);
-				$this->dynamicContainerSize = $in->getUnsignedVarInt();
-			}else{
-				$dynamicId = $this->containerName->getDynamicId();
-				$this->containerName = new FullContainerName(0, $dynamicId);
-			}
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->containerName = FullContainerName::read($in);
+			$this->dynamicContainerSize = $in->getUnsignedVarInt();
+		}elseif($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$dynamicId = $this->containerName->getDynamicId();
+			$this->containerName = new FullContainerName(0, $dynamicId);
 		}
 		$this->item = ItemStackWrapper::read($in);
 	}
@@ -58,13 +56,11 @@ class InventorySlotPacket extends DataPacket implements ClientboundPacket{
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putUnsignedVarInt($this->windowId);
 		$out->putUnsignedVarInt($this->inventorySlot);
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->containerName->write($out);
-				$out->putUnsignedVarInt($this->dynamicContainerSize);
-			}else{
-				$out->putUnsignedVarInt($this->containerName->getDynamicId() ?? 0);
-			}
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->containerName->write($out);
+			$out->putUnsignedVarInt($this->dynamicContainerSize);
+		}elseif($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+			$out->putUnsignedVarInt($this->containerName->getDynamicId() ?? 0);
 		}
 		$this->item->write($out);
 	}

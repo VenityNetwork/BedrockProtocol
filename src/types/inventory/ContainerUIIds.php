@@ -14,9 +14,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\inventory;
 
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
-use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 final class ContainerUIIds{
 
 	private function __construct(){
@@ -87,33 +84,4 @@ final class ContainerUIIds{
 	public const SMITHING_TABLE_TEMPLATE = 61;
 	public const CRAFTER = 62;
 	public const DYNAMIC = 63;
-
-	public static function write(PacketSerializer $out, int $containerId, bool $legacy = false) : void{
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_712 && !$legacy){
-			(new FullContainerName($containerId))->write($out);
-			return;
-		}
-		if($out->getProtocol() < ProtocolInfo::PROTOCOL_560){
-			if($containerId > self::RECIPE_BOOK){
-				$containerId--;
-			}elseif($containerId === self::RECIPE_BOOK){
-				throw new \InvalidArgumentException("Invalid container ID for protocol version " . $out->getProtocol());
-			}
-		}
-
-		$out->putByte($containerId);
-	}
-
-	public static function read(PacketSerializer $in, bool $legacy = false) : int{
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_712 && !$legacy){
-			return FullContainerName::read($in)->getContainerId();
-		}
-		$containerId = $in->getByte();
-
-		if($in->getProtocol() < ProtocolInfo::PROTOCOL_560 && $containerId >= self::RECIPE_BOOK){
-			$containerId++;
-		}
-
-		return $containerId;
-	}
 }
