@@ -41,7 +41,7 @@ final class ItemStackRequestSlotInfo{
 		$containerName = FullContainerName::read($in);
 		$slotId = $in->getByte();
 		$stackId = $in->readGenericTypeNetworkId();
-		return new self($containerName, $slotId, $stackId);
+		return new self($containerName->getContainerId(), $slotId, $stackId);
 	}
 
 	public function write(PacketSerializer $out) : void{

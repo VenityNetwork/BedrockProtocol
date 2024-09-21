@@ -45,7 +45,7 @@ final class ItemStackResponseContainerInfo{
 		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
 			$slots[] = ItemStackResponseSlotInfo::read($in);
 		}
-		return new self($containerName, $slots);
+		return new self($containerName->getContainerId(), $slots);
 	}
 
 	public function write(PacketSerializer $out) : void{
