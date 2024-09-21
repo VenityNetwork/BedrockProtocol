@@ -19,13 +19,18 @@ use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 use function count;
 
 final class ItemStackResponseContainerInfo{
+
+	private FullContainerName $containerName;
+
 	/**
 	 * @param ItemStackResponseSlotInfo[] $slots
 	 */
 	public function __construct(
-		private FullContainerName $containerName,
+		int $containerId,
 		private array $slots
-	){}
+	){
+		$this->containerName = new FullContainerName($containerId);
+	}
 
 	public function getContainerId() : int{ return $this->containerName->getContainerId(); }
 

@@ -18,11 +18,16 @@ use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 
 final class ItemStackRequestSlotInfo{
+
+	private FullContainerName $containerName;
+
 	public function __construct(
-		private FullContainerName $containerName,
+		int $containerId,
 		private int $slotId,
 		private int $stackId
-	){}
+	){
+		$this->containerName = new FullContainerName($containerId);
+	}
 
 	public function getContainerId() : int{ return $this->containerName->getContainerId(); }
 
