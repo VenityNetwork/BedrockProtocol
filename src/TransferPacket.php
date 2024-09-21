@@ -46,7 +46,7 @@ class TransferPacket extends DataPacket implements ClientboundPacket{
 		$out->putString($this->address);
 		$out->putLShort($this->port);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-			$this->reloadWorld = $out->getBool();
+			$out->putBool($this->reloadWorld);
 		}
 	}
 
