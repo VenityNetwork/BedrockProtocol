@@ -105,6 +105,9 @@ final class ClientData{
 	/** @required */
 	public string $PlatformOnlineId;
 
+	/** >= PROTOCOL_748 */
+	public string $PlatformType;
+
 	public string $PlatformUserId = ""; //xbox-only, apparently
 
 	/** @required */
