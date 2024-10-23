@@ -76,6 +76,12 @@ final class ClientData{
 	/** @required */
 	public string $LanguageCode;
 
+	/** >= PROTOCOL_748 */
+	public int $MaxViewDistance;
+
+	/** >= PROTOCOL_748 */
+	public int $MemoryTier;
+
 	public bool $OverrideSkin;
 
 	/**

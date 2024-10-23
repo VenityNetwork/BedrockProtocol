@@ -16,6 +16,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
+use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 use function count;
 
@@ -49,7 +50,12 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 		}
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 			$this->containerName = FullContainerName::read($in);
-			$this->dynamicContainerSize = $in->getUnsignedVarInt();
+			if($in->getProtocol() >= ProtocolInfo::PROTOCOL_748) {
+				ItemStackWrapper::read($in); // Storage
+				$this->dynamicContainerSize = 0;
+			}else{
+				$this->dynamicContainerSize = $in->getUnsignedVarInt();
+			}
 		}elseif($in->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			$dynamicId = $in->getUnsignedVarInt();
 			$this->containerName = new FullContainerName(0, $dynamicId);
@@ -64,7 +70,11 @@ class InventoryContentPacket extends DataPacket implements ClientboundPacket{
 		}
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 			$this->containerName->write($out);
-			$out->putUnsignedVarInt($this->dynamicContainerSize);
+			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+				ItemStackWrapper::legacy(ItemStack::null())->write($out); // Storage
+			}else {
+				$out->putUnsignedVarInt($this->dynamicContainerSize);
+			}
 		}elseif($out->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			$out->putUnsignedVarInt($this->containerName->getDynamicId() ?? 0);
 		}

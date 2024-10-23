@@ -46,7 +46,11 @@ class UpdatePlayerGameTypePacket extends DataPacket implements ClientboundPacket
 		$this->gameMode = $in->getVarInt();
 		$this->playerActorUniqueId = $in->getActorUniqueId();
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_671){
-			$this->tick = $in->getUnsignedVarInt();
+			if($in->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+				$this->tick = $in->getUnsignedVarLong();
+			}else {
+				$this->tick = $in->getUnsignedVarInt();
+			}
 		}
 	}
 
@@ -54,7 +58,11 @@ class UpdatePlayerGameTypePacket extends DataPacket implements ClientboundPacket
 		$out->putVarInt($this->gameMode);
 		$out->putActorUniqueId($this->playerActorUniqueId);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_671){
-			$out->putUnsignedVarInt($this->tick);
+			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+				$out->putUnsignedVarLong($this->tick);
+			}else {
+				$out->putUnsignedVarInt($this->tick);
+			}
 		}
 	}
 

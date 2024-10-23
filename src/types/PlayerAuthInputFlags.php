@@ -99,5 +99,10 @@ final class PlayerAuthInputFlags{
 	public const STOP_FLYING = 43;
 	public const ACK_ACTOR_DATA = 44;
 	public const IN_CLIENT_PREDICTED_VEHICLE = 45;
+	public const START_USING_ITEM = 53;
+	public const IS_CAMERA_RELATIVE_MOVEMENT_ENABLED = 54;
+	public const IS_ROT_CONTROLLED_BY_MOVE_DIRECTION = 55;
+	public const START_SPIN_ATTACK = 56;
+	public const STOP_SPIN_ATTACK = 57;
 
 }
