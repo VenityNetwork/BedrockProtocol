@@ -17,6 +17,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\resourcepacks\BehaviorPackInfoEntry;
 use pocketmine\network\mcpe\protocol\types\resourcepacks\ResourcePackInfoEntry;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use function count;
 
 class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
@@ -30,6 +32,9 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 	public bool $hasAddons = false;
 	public bool $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
 	public bool $forceServerPacks = false;
+	public UuidInterface $worldTemplateId;
+	public string $worldTemplateVersion;
+
 	/**
 	 * @var string[]
 	 * @phpstan-var array<string, string>
@@ -52,6 +57,8 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 		$result->hasScripts = $hasScripts;
 		$result->forceServerPacks = $forceServerPacks;
 		$result->cdnUrls = $cdnUrls;
+		$result->worldTemplateId = Uuid::fromString("");
+		$result->worldTemplateVersion = "";
 		return $result;
 	}
 
@@ -61,6 +68,10 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 			$this->hasAddons = $in->getBool();
 		}
 		$this->hasScripts = $in->getBool();
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+			$this->worldTemplateId = $in->getUuid();
+			$this->worldTemplateVersion = $in->getString();
+		}
 		if($in->getProtocol() < ProtocolInfo::PROTOCOL_729) {
 			$this->forceServerPacks = $in->getBool();
 		}
@@ -92,6 +103,10 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 			$out->putBool($this->hasAddons);
 		}
 		$out->putBool($this->hasScripts);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+			$out->putUuid($this->worldTemplateId);
+			$out->putString($this->worldTemplateVersion);
+		}
 		if($out->getProtocol() < ProtocolInfo::PROTOCOL_729) {
 			$out->putBool($this->forceServerPacks);
 		}
