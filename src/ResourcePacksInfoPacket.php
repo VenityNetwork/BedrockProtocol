@@ -57,7 +57,7 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 		$result->hasScripts = $hasScripts;
 		$result->forceServerPacks = $forceServerPacks;
 		$result->cdnUrls = $cdnUrls;
-		$result->worldTemplateId = Uuid::fromString("");
+		$result->worldTemplateId = Uuid::fromString(Uuid::NIL);
 		$result->worldTemplateVersion = "";
 		return $result;
 	}
