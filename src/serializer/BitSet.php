@@ -14,14 +14,11 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\serializer;
 
-use pocketmine\utils\BinaryDataException;
 use function array_pad;
+use function array_slice;
 use function array_values;
-use function chr;
 use function count;
 use function intdiv;
-use function min;
-use function ord;
 
 class BitSet{
 	private const INT_BITS = PHP_INT_SIZE * 8;
@@ -34,7 +31,7 @@ class BitSet{
 		private readonly int $length,
 		private array $parts = []
 	){
-		$expectedPartsCount = intdiv($length + self::INT_BITS - 1, self::INT_BITS);
+		$expectedPartsCount = self::getExpectedPartsCount($length);
 		$partsCount = count($parts);
 
 		if($partsCount > $expectedPartsCount){
@@ -78,6 +75,24 @@ class BitSet{
 		];
 	}
 
+	/**
+	 * @internal
+	 */
+	public function getPartsCount() : int{
+		return count($this->parts);
+	}
+
+	/**
+	 * @return int[]
+	 */
+	public function getParts() : array{
+		return $this->parts;
+	}
+
+	private static function getExpectedPartsCount(int $length) : int{
+		return intdiv($length + self::INT_BITS - 1, self::INT_BITS);
+	}
+
 	public static function read(PacketSerializer $in, int $length) : self{
 		$result = [0];
 
@@ -85,7 +100,7 @@ class BitSet{
 		$currentShift = 0;
 
 		for($i = 0; $i < $length; $i += self::SHIFT){
-			$b = ord($in->get(1));
+			$b = $in->getByte();
 			$bits = $b & 0x7f;
 
 			$result[$currentIndex] |= $bits << $currentShift; //extra bits will be discarded
@@ -98,33 +113,20 @@ class BitSet{
 			$currentShift = $nextShift;
 
 			if(($b & 0x80) === 0){
-				return new self($length, $result);
+				return new self($length, array_slice($result, 0, self::getExpectedPartsCount($length)));
 			}
 		}
 
-		throw new BinaryDataException("Didn't terminate after reading $length bits");
+		return new self($length, array_slice($result, 0, self::getExpectedPartsCount($length)));
 	}
 
-	public static function readFromUnsignedVarLong(PacketSerializer $in, int $minimum): self{
-		$flags = $in->getUnsignedVarLong();
-		$length = 63; // assume
-		$parts = [];
-		for($i = 0; $i < $length; $i++){
-			$parts[] = ($flags >> $i) & 1;
-		}
-		if($length < $minimum){
-			for($i = $length; $i < $minimum; $i++){
-				$parts[] = 0;
-			}
-		}
-		return new self($length, $parts);
-	}
-
-	public function write(PacketSerializer $out) : void{
-		$buf = "";
-
+	public function write(PacketSerializer $out, int $length = null) : void{
 		$parts = $this->parts;
-		$length = $this->length;
+		$length ??= $this->length;
+
+		if($length > $this->length){
+			throw new \InvalidArgumentException("Cannot write more bits than the BitSet contains");
+		}
 
 		$currentIndex = 0;
 		$currentShift = 0;
@@ -141,23 +143,11 @@ class BitSet{
 			$last = $i + self::SHIFT >= $length;
 			$bits |= $last ? 0 : 0x80;
 
-			$buf .= chr($bits);
+			$out->putByte($bits);
 			if($last){
 				break;
 			}
 		}
-
-		$out->put($buf);
-	}
-
-	public function writeAsUnsignedVarLong(PacketSerializer $out): void{
-		$flags = 0;
-		$max = 63; // assume
-		for($i = 0; $i < min($max, $this->length); $i++){
-			$flags |= ($this->get($i) ? 1 : 0) << $i;
-		}
-
-		$out->putUnsignedVarLong($flags);
 	}
 
 	public function getLength() : int{

@@ -223,11 +223,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		$this->moveVecX = $in->getLFloat();
 		$this->moveVecZ = $in->getLFloat();
 		$this->headYaw = $in->getLFloat();
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_766){
-			$this->inputFlags = BitSet::read($in, 65);
-		}else{
-			$this->inputFlags = BitSet::readFromUnsignedVarLong($in, 65);
-		}
+		$this->inputFlags = BitSet::read($in, $in->getProtocol() >= ProtocolInfo::PROTOCOL_766 ? 65 : 64);
 		$this->inputMode = $in->getUnsignedVarInt();
 		$this->playMode = $in->getUnsignedVarInt();
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_527){
@@ -285,11 +281,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		$out->putLFloat($this->moveVecX);
 		$out->putLFloat($this->moveVecZ);
 		$out->putLFloat($this->headYaw);
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_766){
-			$this->inputFlags->write($out);
-		}else{
-			$this->inputFlags->writeAsUnsignedVarLong($out);
-		}
+		$this->inputFlags->write($out, $out->getProtocol() >= ProtocolInfo::PROTOCOL_766 ? 65 : 64);
 		$out->putUnsignedVarInt($this->inputMode);
 		$out->putUnsignedVarInt($this->playMode);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_527){
