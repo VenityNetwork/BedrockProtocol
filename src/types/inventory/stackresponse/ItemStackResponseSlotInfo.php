@@ -59,7 +59,7 @@ final class ItemStackResponseSlotInfo{
 		$out->writeGenericTypeNetworkId($this->itemStackId);
 		$out->putString($this->customName);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_766) {
-			$out->putString(""); // filteredCustomName
+			$out->putString($this->customName); // filteredCustomName
 		}
 		$out->putVarInt($this->durabilityCorrection);
 	}
