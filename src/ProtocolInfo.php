@@ -71,6 +71,7 @@ final class ProtocolInfo{
 	public const PROTOCOL_475 = 475; // v1.18.0
 
 	public const COMPATIBLE_PROTOCOL = [
+		self::PROTOCOL_776,
 		self::PROTOCOL_766,
 		self::PROTOCOL_748,
 		self::PROTOCOL_729,
