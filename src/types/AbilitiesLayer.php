@@ -46,8 +46,9 @@ final class AbilitiesLayer{
 	public const ABILITY_WORLD_BUILDER = 16;
 	public const ABILITY_NO_CLIP = 17;
 	public const ABILITY_PRIVILEGED_BUILDER = 18;
+	public const ABILITY_VERTICAL_FLY_SPEED = 19;
 
-	public const NUMBER_OF_ABILITIES = 19;
+	public const NUMBER_OF_ABILITIES = 20;
 
 	/**
 	 * @param bool[] $boolAbilities
@@ -57,7 +58,8 @@ final class AbilitiesLayer{
 		private int $layerId,
 		private array $boolAbilities,
 		private ?float $flySpeed,
-		private ?float $walkSpeed
+		private ?float $verticalFlySpeed,
+		private ?float $walkSpeed,
 	){}
 
 	public function getLayerId() : int{ return $this->layerId; }
@@ -71,6 +73,8 @@ final class AbilitiesLayer{
 
 	public function getFlySpeed() : ?float{ return $this->flySpeed; }
 
+	public function getVerticalFlySpeed() : ?float{ return $this->verticalFlySpeed; }
+
 	public function getWalkSpeed() : ?float{ return $this->walkSpeed; }
 
 	public static function decode(PacketSerializer $in) : self{
@@ -79,6 +83,7 @@ final class AbilitiesLayer{
 		$setAbilityValues = $in->getLInt();
 		$flySpeed = $in->getLFloat();
 		$walkSpeed = $in->getLFloat();
+		$verticalFlySpeed = $in->getProtocol() >= ProtocolInfo::PROTOCOL_776 ? $in->getLFloat() : 0.0;
 
 		$boolAbilities = [];
 		$numberOfAbilities = self::NUMBER_OF_ABILITIES;
@@ -99,6 +104,12 @@ final class AbilitiesLayer{
 			}
 			$flySpeed = null;
 		}
+		if(($setAbilities & (1 << self::ABILITY_VERTICAL_FLY_SPEED)) === 0) {
+			if($verticalFlySpeed !== 0.0){
+				throw new PacketDecodeException("Vertical fly speed should be zero if the layer does not set it");
+			}
+			$verticalFlySpeed = null;
+		}
 		if(($setAbilities & (1 << self::ABILITY_WALK_SPEED)) === 0){
 			if($walkSpeed !== 0.0){
 				throw new PacketDecodeException("Walk speed should be zero if the layer does not set it");
@@ -106,7 +117,7 @@ final class AbilitiesLayer{
 			$walkSpeed = null;
 		}
 
-		return new self($layerId, $boolAbilities, $flySpeed, $walkSpeed);
+		return new self($layerId, $boolAbilities, $flySpeed, $walkSpeed, $verticalFlySpeed);
 	}
 
 	public function encode(PacketSerializer $out) : void{
@@ -121,6 +132,9 @@ final class AbilitiesLayer{
 		if($this->flySpeed !== null){
 			$setAbilities |= (1 << self::ABILITY_FLY_SPEED);
 		}
+		if($this->verticalFlySpeed !== null){
+			$setAbilities |= (1 << self::ABILITY_VERTICAL_FLY_SPEED);
+		}
 		if($this->walkSpeed !== null){
 			$setAbilities |= (1 << self::ABILITY_WALK_SPEED);
 		}
@@ -128,6 +142,9 @@ final class AbilitiesLayer{
 		$out->putLInt($setAbilities);
 		$out->putLInt($setAbilityValues);
 		$out->putLFloat($this->flySpeed ?? 0);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+			$out->putLFloat($this->verticalFlySpeed ?? 0);
+		}
 		$out->putLFloat($this->walkSpeed ?? 0);
 	}
 }

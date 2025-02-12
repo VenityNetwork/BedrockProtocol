@@ -45,6 +45,7 @@ class BossEventPacket extends DataPacket implements ClientboundPacket, Serverbou
 	public int $playerActorUniqueId;
 	public float $healthPercent;
 	public string $title;
+	public string $filteredTitle = "";
 	public bool $darkenScreen;
 	public int $color;
 	public int $overlay;
@@ -120,6 +121,9 @@ class BossEventPacket extends DataPacket implements ClientboundPacket, Serverbou
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_SHOW:
 				$this->title = $in->getString();
+				if($in->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+					$this->filteredTitle = $in->getString();
+				}
 				$this->healthPercent = $in->getLFloat();
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_PROPERTIES:
@@ -137,6 +141,9 @@ class BossEventPacket extends DataPacket implements ClientboundPacket, Serverbou
 				break;
 			case self::TYPE_TITLE:
 				$this->title = $in->getString();
+				if($in->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+					$this->filteredTitle = $in->getString();
+				}
 				break;
 			default:
 				break;
@@ -155,6 +162,9 @@ class BossEventPacket extends DataPacket implements ClientboundPacket, Serverbou
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_SHOW:
 				$out->putString($this->title);
+				if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+					$out->putString($this->filteredTitle);
+				}
 				$out->putLFloat($this->healthPercent);
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_PROPERTIES:
@@ -168,6 +178,9 @@ class BossEventPacket extends DataPacket implements ClientboundPacket, Serverbou
 				break;
 			case self::TYPE_TITLE:
 				$out->putString($this->title);
+				if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+					$out->putString($this->filteredTitle);
+				}
 				break;
 			default:
 				break;

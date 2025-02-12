@@ -170,12 +170,14 @@ class StartGamePacket extends DataPacket implements ClientboundPacket{
 		}
 
 		$this->itemTable = [];
-		for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; ++$i){
-			$stringId = $in->getString();
-			$numericId = $in->getSignedLShort();
-			$isComponentBased = $in->getBool();
+		if($in->getProtocol() < ProtocolInfo::PROTOCOL_776) {
+			for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; ++$i) {
+				$stringId = $in->getString();
+				$numericId = $in->getSignedLShort();
+				$isComponentBased = $in->getBool();
 
-			$this->itemTable[] = new ItemTypeEntry($stringId, $numericId, $isComponentBased);
+				$this->itemTable[] = new ItemTypeEntry($stringId, $numericId, $isComponentBased);
+			}
 		}
 
 		$this->multiplayerCorrelationId = $in->getString();
@@ -226,11 +228,13 @@ class StartGamePacket extends DataPacket implements ClientboundPacket{
 			$out->put($entry->getStates()->getEncodedNbt());
 		}
 
-		$out->putUnsignedVarInt(count($this->itemTable));
-		foreach($this->itemTable as $entry){
-			$out->putString($entry->getStringId());
-			$out->putLShort($entry->getNumericId());
-			$out->putBool($entry->isComponentBased());
+		if($out->getProtocol() < ProtocolInfo::PROTOCOL_776) {
+			$out->putUnsignedVarInt(count($this->itemTable));
+			foreach($this->itemTable as $entry) {
+				$out->putString($entry->getStringId());
+				$out->putLShort($entry->getNumericId());
+				$out->putBool($entry->isComponentBased());
+			}
 		}
 
 		$out->putString($this->multiplayerCorrelationId);

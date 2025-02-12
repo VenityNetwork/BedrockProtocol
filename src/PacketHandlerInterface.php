@@ -324,7 +324,7 @@ interface PacketHandlerInterface{
 
 	public function handleCorrectPlayerMovePrediction(CorrectPlayerMovePredictionPacket $packet) : bool;
 
-	public function handleItemComponent(ItemComponentPacket $packet) : bool;
+	public function handleItemRegistry(ItemRegistryPacket $packet) : bool;
 
 	public function handleFilterText(FilterTextPacket $packet) : bool;
 

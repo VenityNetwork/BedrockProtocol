@@ -634,7 +634,7 @@ trait PacketHandlerDefaultImplTrait{
 		return false;
 	}
 
-	public function handleItemComponent(ItemComponentPacket $packet) : bool{
+	public function handleItemRegistry(ItemRegistryPacket $packet) : bool{
 		return false;
 	}
 

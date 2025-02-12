@@ -16,11 +16,14 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\CreativeContentEntry;
+use pocketmine\network\mcpe\protocol\types\inventory\CreativeGroupEntry;
 use function count;
 
 class CreativeContentPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::CREATIVE_CONTENT_PACKET;
 
+	/** @var CreativeGroupEntry[] */
+	private array $groups;
 	/** @var CreativeContentEntry[] */
 	private array $entries;
 
@@ -28,16 +31,26 @@ class CreativeContentPacket extends DataPacket implements ClientboundPacket{
 	 * @generate-create-func
 	 * @param CreativeContentEntry[] $entries
 	 */
-	public static function create(array $entries) : self{
+	public static function create(array $groups, array $entries) : self{
 		$result = new self;
+		$result->groups = $groups;
 		$result->entries = $entries;
 		return $result;
 	}
+
+	/** @return CreativeGroupEntry[] */
+	public function getGroups() : array{ return $this->groups; }
 
 	/** @return CreativeContentEntry[] */
 	public function getEntries() : array{ return $this->entries; }
 
 	protected function decodePayload(PacketSerializer $in) : void{
+		$this->groups = [];
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+			for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i) {
+				$this->groups[] = CreativeGroupEntry::read($in);
+			}
+		}
 		$this->entries = [];
 		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
 			$this->entries[] = CreativeContentEntry::read($in);
@@ -45,6 +58,12 @@ class CreativeContentPacket extends DataPacket implements ClientboundPacket{
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776) {
+			$out->putUnsignedVarInt(count($this->groups));
+			foreach($this->groups as $group){
+				$group->write($out);
+			}
+		}
 		$out->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
 			$entry->write($out);
