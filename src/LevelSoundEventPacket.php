@@ -57,7 +57,7 @@ class LevelSoundEventPacket extends DataPacket implements ClientboundPacket, Ser
 		$this->isBabyMob = $in->getBool();
 		$this->disableRelativeVolume = $in->getBool();
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_786){
-			$this->actorUniqueId = $in->getActorUniqueId();
+			$this->actorUniqueId = $in->getLLong();
 		}
 	}
 
@@ -69,7 +69,7 @@ class LevelSoundEventPacket extends DataPacket implements ClientboundPacket, Ser
 		$out->putBool($this->isBabyMob);
 		$out->putBool($this->disableRelativeVolume);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_786){
-			$out->putActorUniqueId($this->actorUniqueId);
+			$out->putLLong($this->actorUniqueId);
 		}
 	}
 
