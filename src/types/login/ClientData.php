@@ -67,6 +67,9 @@ final class ClientData{
 	/** @required */
 	public string $GameVersion;
 
+	/** >= PROTOCOL_786 */
+	public string $GraphicsMode;
+
 	/** @required */
 	public int $GuiScale;
 

@@ -45,17 +45,25 @@ class SetHudPacket extends DataPacket implements ClientboundPacket{
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->hudElements = [];
 		for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->hudElements[] = HudElement::fromPacket($in->getByte());
+			$this->hudElements[] = HudElement::fromPacket($in->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? $in->getVarInt() : $in->getByte());
 		}
-		$this->visibility = HudVisibility::fromPacket($in->getByte());
+		$this->visibility = HudVisibility::fromPacket($in->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? $in->getVarInt() : $in->getByte());
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putUnsignedVarInt(count($this->hudElements));
 		foreach($this->hudElements as $element){
-			$out->putByte($element->value);
+			if($out->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+				$out->putVarInt($element->value);
+			}else{
+				$out->putByte($element->value);
+			}
 		}
-		$out->putByte($this->visibility->value);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+			$out->putVarInt($this->visibility->value);
+			}else{
+			$out->putByte($this->visibility->value);
+		}
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{
