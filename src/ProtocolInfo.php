@@ -32,13 +32,15 @@ final class ProtocolInfo{
 	 */
 
 	/** Actual Minecraft: PE protocol version */
-	public const CURRENT_PROTOCOL = 786;
+	public const CURRENT_PROTOCOL = 800;
 	/** Current Minecraft PE version reported by the server. This is usually the earliest currently supported version. */
-	public const MINECRAFT_VERSION = 'v1.21.70';
+	public const MINECRAFT_VERSION = 'v1.21.80';
 	/** Version number sent to clients in ping responses. */
-	public const MINECRAFT_VERSION_NETWORK = '1.21.70';
+	public const MINECRAFT_VERSION_NETWORK = '1.21.80';
 
 	public const BASE_VERSION = '1.18.0';
+
+	public const PROTOCOL_800 = 800; // 1.21.80
 
 	public const PROTOCOL_786 = 786; // 1.21.70
 	public const PROTOCOL_776 = 776; // 1.21.60
@@ -72,6 +74,7 @@ final class ProtocolInfo{
 	public const PROTOCOL_475 = 475; // v1.18.0
 
 	public const COMPATIBLE_PROTOCOL = [
+		self::PROTOCOL_800,
 		self::PROTOCOL_786,
 		self::PROTOCOL_776,
 		self::PROTOCOL_766,

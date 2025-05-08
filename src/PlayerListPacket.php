@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\color\Color;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use function count;
@@ -101,6 +102,9 @@ class PlayerListPacket extends DataPacket implements ClientboundPacket{
 				$out->putBool($entry->isHost);
 				if($out->getProtocol() >= ProtocolInfo::PROTOCOL_649){
 					$out->putBool($entry->isSubClient);
+				}
+				if($out->getProtocol() >= ProtocolInfo::PROTOCOL_800){
+					$out->putLInt(($entry->color ?? new Color(255, 255, 255))->toARGB());
 				}
 			}else{
 				$out->putUUID($entry->uuid);

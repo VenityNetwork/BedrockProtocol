@@ -20,25 +20,24 @@ use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 class BiomeDefinitionListPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::BIOME_DEFINITION_LIST_PACKET;
 
-	/** @phpstan-var CacheableNbt<\pocketmine\nbt\tag\CompoundTag> */
-	public CacheableNbt $definitions;
+	public string $serializedData;
 
 	/**
 	 * @generate-create-func
 	 * @phpstan-param CacheableNbt<\pocketmine\nbt\tag\CompoundTag> $definitions
 	 */
-	public static function create(CacheableNbt $definitions) : self{
+	public static function create(string $serializedData) : self{
 		$result = new self;
-		$result->definitions = $definitions;
+		$result->serializedData = $serializedData;
 		return $result;
 	}
 
 	protected function decodePayload(PacketSerializer $in) : void{
-		$this->definitions = new CacheableNbt($in->getNbtCompoundRoot());
+		$this->serializedData = $in->getRemaining();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
-		$out->put($this->definitions->getEncodedNbt());
+		$out->put($this->serializedData);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{
